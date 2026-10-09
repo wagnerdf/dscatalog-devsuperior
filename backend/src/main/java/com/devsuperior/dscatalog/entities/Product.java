@@ -1,6 +1,5 @@
 package com.devsuperior.dscatalog.entities;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
@@ -18,9 +17,8 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_product")
-public class Product implements Serializable{
-	private static final long serialVersionUID = 1L;
-	
+public class Product {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -36,8 +34,8 @@ public class Product implements Serializable{
 	
 	@ManyToMany
 	@JoinTable(name = "tb_product_category",
-			joinColumns = @JoinColumn(name = "product_id"),
-			inverseJoinColumns = @JoinColumn(name = "category_id"))
+		joinColumns = @JoinColumn(name = "product_id"),
+		inverseJoinColumns = @JoinColumn(name = "category_id"))	
 	Set<Category> categories = new HashSet<>();
 	
 	public Product() {
@@ -120,12 +118,4 @@ public class Product implements Serializable{
 		Product other = (Product) obj;
 		return Objects.equals(id, other.id);
 	}
-
-	
-	
-	
-	
-	
-	
-
 }
