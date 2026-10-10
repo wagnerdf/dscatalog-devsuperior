@@ -8,8 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.devsuperior.dscatalog.repositories.ProductRepository;
+import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,12 +25,24 @@ public class ProductServiceTests {
 	
 	private long existingId;
 	private long nonExistingId;
+	private long dependentId;
 	
 	@BeforeEach
 	void setup() throws Exception{
 		existingId = 1L;
 		nonExistingId = 2L;
-				
+		dependentId = 4L;
+	}
+	
+	@Test
+	public void deleteShouldThrowDatabaseExceptionWhenDependentId() {
+		
+		Mockito.doThrow(DataIntegrityViolationException.class).when(repository).deleteById(dependentId);
+		Mockito.when(repository.existsById(dependentId)).thenReturn(true);
+		
+		Assertions.assertThrows(DatabaseException.class, () -> {
+			service.delete(dependentId);
+		});
 	}
 	
 	@Test
