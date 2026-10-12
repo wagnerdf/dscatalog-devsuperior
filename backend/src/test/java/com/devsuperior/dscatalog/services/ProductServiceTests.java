@@ -1,7 +1,6 @@
 package com.devsuperior.dscatalog.services;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
@@ -33,6 +33,9 @@ public class ProductServiceTests {
 
 	@Mock
 	private ProductRepository repository;
+	
+	@Mock
+	private CategoryRepository categoryRepository;
 	
 	private long existingId;
 	private long nonExistingId;
@@ -48,6 +51,43 @@ public class ProductServiceTests {
 		product = Factory.createProduct();
 		page = new PageImpl<>(List.of(product));		 
 	}
+	
+
+
+	@Test
+	public void insertShouldReturnProductDTO() {
+	
+	    // Cria um ProductDTO com dados fictícios utilizando a classe Factory.
+	    ProductDTO dto = Factory.createProductDTO();
+	
+	    // Cria um produto fictício que será utilizado como retorno simulado do repository.save().
+	    Product product = Factory.createProduct();
+	
+	    // Configura o Mockito para que repository.save() retorne o produto criado acima,
+	    // independentemente do objeto Product recebido como argumento.
+	    Mockito.when(repository.save(ArgumentMatchers.any(Product.class)))
+	           .thenReturn(product);
+	
+	    // Executa o método insert() do ProductService, passando o DTO criado pela Factory.
+	    // Internamente, o serviço copia os dados do DTO para uma entidade Product,
+	    // salva essa entidade e retorna um novo ProductDTO.
+	    ProductDTO result = service.insert(dto);
+	
+	    // Verifica se o resultado retornado pelo serviço não é nulo.
+	    Assertions.assertNotNull(result);
+	
+	    // Verifica se o nome do produto retornado corresponde ao esperado.
+	    Assertions.assertEquals("Phone", result.getName());
+	
+	    // Verifica se o preço do produto retornado corresponde ao esperado.
+	    Assertions.assertEquals(800.5, result.getPrice());
+	
+	    // Verifica se o método save() do ProductRepository foi chamado
+	    // pelo menos uma vez, recebendo algum objeto do tipo Product.
+	    Mockito.verify(repository).save(ArgumentMatchers.any(Product.class));
+	}
+
+
 	
 	@Test
 	public void findAllPagedShouldReturnPage() {
