@@ -1,6 +1,7 @@
 package com.devsuperior.dscatalog.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +53,27 @@ public class ProductServiceTests {
 		page = new PageImpl<>(List.of(product));		 
 	}
 	
+	@Test
+	public void findByIdShouldReturnProductDTOWhenIdExists() {
+	    // Configura o Mockito para retornar o produto quando o ID existente for pesquisado.
+	    Mockito.when(repository.findById(existingId))
+	           .thenReturn(Optional.of(product));
 
+	    // Executa a busca do produto pelo identificador.
+	    ProductDTO result = service.findById(existingId);
+
+	    // Verifica se o resultado não é nulo.
+	    Assertions.assertNotNull(result);
+
+	    // Verifica se o nome do produto retornado está correto.
+	    Assertions.assertEquals("Phone", result.getName());
+
+	    // Verifica se o preço do produto retornado está correto.
+	    Assertions.assertEquals(800.5, result.getPrice());
+
+	    // Verifica se o repositório foi consultado com o ID esperado.
+	    Mockito.verify(repository).findById(existingId);
+	}
 
 	@Test
 	public void insertShouldReturnProductDTO() {
