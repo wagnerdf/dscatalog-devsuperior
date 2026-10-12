@@ -53,6 +53,22 @@ public class ProductServiceTests {
 		page = new PageImpl<>(List.of(product));		 
 	}
 	
+
+	@Test
+	public void findByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
+	    // Configura o Mockito para retornar um Optional vazio ao pesquisar um produto inexistente.
+	    Mockito.when(repository.findById(nonExistingId))
+	           .thenReturn(Optional.empty());
+	
+	    // Verifica se o serviço lança ResourceNotFoundException ao não encontrar o produto.
+	    Assertions.assertThrows(ResourceNotFoundException.class,
+	            () -> service.findById(nonExistingId));
+	
+	    // Verifica se o repositório foi consultado com o ID do produto inexistente.
+	    Mockito.verify(repository).findById(nonExistingId);
+	}
+
+	
 	@Test
 	public void findByIdShouldReturnProductDTOWhenIdExists() {
 	    // Configura o Mockito para retornar o produto quando o ID existente for pesquisado.
