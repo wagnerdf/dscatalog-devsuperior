@@ -142,9 +142,16 @@ public class ProductServiceTests {
 	@Test
 	public void deleteShouldThrowDatabaseExceptionWhenDependentId() {
 		
+		// Configura o Mockito para simular que a exclusão do produto
+	    // lança DataIntegrityViolationException devido a uma dependência no banco.
 		Mockito.doThrow(DataIntegrityViolationException.class).when(repository).deleteById(dependentId);
+		
+		// Configura o Mockito para simular que o produto dependente existe.
+	    // Isso permite que o serviço prossiga até a tentativa de exclusão.
 		Mockito.when(repository.existsById(dependentId)).thenReturn(true);
 		
+		// Verifica se o serviço converte a exceção de integridade do banco
+	    // em uma DatabaseException ao tentar excluir o produto dependente.
 		Assertions.assertThrows(DatabaseException.class, () -> {
 			service.delete(dependentId);
 		});
