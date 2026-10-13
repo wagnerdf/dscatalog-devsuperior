@@ -164,12 +164,18 @@ public class ProductServiceTests {
 	@Test
 	public void deleteShouldDoNothingWhenIdExists() {
 
+		// Configura o Mockito para simular a existência do produto no banco de dados.
+	    // Quando existsById() receber existingId, retornará true.
 		Mockito.when(repository.existsById(existingId)).thenReturn(true);
 		
+		// Executa o método delete() e verifica se nenhuma exceção é lançada.
+	    // Isso indica que a exclusão foi executada sem erros.
 		Assertions.assertDoesNotThrow(() -> {
 			service.delete(existingId);
 		});
 		
+		// Verifica se deleteById() foi chamado exatamente uma vez
+	    // com o identificador do produto existente.
 		Mockito.verify(repository, Mockito.times(1)).deleteById(existingId);
 	}
 }
