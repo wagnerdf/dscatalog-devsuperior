@@ -153,8 +153,12 @@ public class ProductServiceTests {
 	@Test
 	public void deleteShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
 		
+		// Configura o Mockito para simular que o produto não existe no banco de dados.
+	    // Quando existsById() receber nonExistingId, retornará false.
 		Mockito.when(repository.existsById(nonExistingId)).thenReturn(false);
 
+		// Verifica se o método delete() lança ResourceNotFoundException
+	    // ao tentar excluir um produto que não existe.
 		Assertions.assertThrows(ResourceNotFoundException.class, () -> {
 			service.delete(nonExistingId);
 		});
