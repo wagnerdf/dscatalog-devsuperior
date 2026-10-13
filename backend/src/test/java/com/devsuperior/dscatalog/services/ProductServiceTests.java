@@ -129,13 +129,23 @@ public class ProductServiceTests {
 	@Test
 	public void findAllPagedShouldReturnPage() {
 		
+		// Configura o Mockito para retornar a página de produtos preparada
+	    // no método setup(), sem consultar um banco de dados real.
 		Mockito.when(repository.findAll((Pageable)ArgumentMatchers.any())).thenReturn(page);
 		
+		// Cria uma solicitação de paginação para a primeira página,
+	    // utilizando o tamanho de 10 registros por página.
 		Pageable pageable = PageRequest.of(0, 10);
 		
+		// Executa o método findAllPaged() do serviço, passando a paginação.
+	    // O serviço deve retornar uma página contendo objetos ProductDTO.
 		Page<ProductDTO> result = service.findAllPaged(pageable);
 		
+		// Verifica se o resultado retornado pelo serviço não é nulo.
 		Assertions.assertNotNull(result);
+		
+		// Verifica se o repositório foi consultado com os parâmetros
+	    // de paginação esperados.
 		Mockito.verify(repository).findAll(pageable);
 	}
 	
