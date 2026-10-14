@@ -12,8 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.services.ProductService;
@@ -45,9 +47,13 @@ public class ProductResourceTests {
 		// Configura o serviço simulado para retornar a página de produtos.
 	    when(service.findAllPaged(any())).thenReturn(page);
 		
-	    // Executa a requisição GET e verifica se a resposta é HTTP 200.
-	    mockMvc.perform(get("/products"))
-	            .andExpect(status().isOk());
+	    // Executa a requisição GET, informando que aceita uma resposta JSON.
+	    ResultActions result =  
+	    		mockMvc.perform(get("/products")
+	    				.accept(MediaType.APPLICATION_JSON));
+	       
+	    // Verifica se a resposta HTTP possui o status 200 (OK).
+	    result.andExpect(status().isOk());
 	}
 
 }
