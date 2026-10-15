@@ -2,7 +2,10 @@ package com.devsuperior.dscatalog.resources;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -22,6 +25,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.services.ProductService;
+import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import com.devsuperior.dscatalog.tests.Factory;
 
@@ -43,6 +47,7 @@ public class ProductResourceTests {
 	
 	private Long existingId;
 	private Long nonExistingId;
+	private Long dependentId;
 	private ProductDTO productDTO;
 	private PageImpl<ProductDTO> page;
 	
@@ -51,6 +56,7 @@ public class ProductResourceTests {
 		
 		existingId = 1L;
 		nonExistingId = 2L;
+		dependentId = 4L;
 		
 		// Cria um ProductDTO com dados fictícios para utilizar nos testes.
 		productDTO = Factory.createProductDTO();
@@ -77,6 +83,16 @@ public class ProductResourceTests {
 		// Configura o serviço simulado para lançar uma exceção quando o produto não existir.
 		when(service.update(eq(nonExistingId), any())).thenThrow(ResourceNotFoundException.class);
 		
+		// Configura o serviço simulado para não lançar exceção ao excluir um produto existente.
+		doNothing().when(service).delete(existingId);
+		
+		// Configura o serviço simulado para lançar ResourceNotFoundException
+		// ao tentar excluir um produto com ID inexistente.
+		doThrow(ResourceNotFoundException.class).when(service).delete(nonExistingId);
+		
+		// Configura o serviço simulado para lançar DatabaseException
+		// ao tentar excluir um produto que possui dependências no banco de dados.
+		doThrow(DatabaseException.class).when(service).delete(dependentId);
 		
 	}
 	
@@ -131,9 +147,6 @@ public class ProductResourceTests {
 		
 		// Converte o DTO do produto para uma string no formato JSON.
 		String jsonBody = objectMapper.writeValueAsString(productDTO);
-		
-		// Converte o DTO do produto para uma string no formato JSON.
-	    String jsonBody = objectMapper.writeValueAsString(productDTO);
 
 	    // Executa a requisição PUT para atualizar o produto com o ID existente,
 	    // enviando os dados do produto no corpo da requisição.
@@ -174,6 +187,39 @@ public class ProductResourceTests {
 		
 		// Verifica se a resposta HTTP possui o status 404 (Not Found).
 		result.andExpect(status().isNotFound());
+	}
+	
+	@Test
+	public void deleteShouldReturnNoContentWhenIdExists() throws Exception {
+
+	    // Executa a requisição DELETE para excluir o produto com ID existente.
+	    ResultActions result =
+	            mockMvc.perform(delete("/products/{id}", existingId));
+
+	    // Verifica se a resposta HTTP possui o status 204 (No Content).
+	    result.andExpect(status().isNoContent());
+	}
+	
+	@Test
+	public void deleteShouldReturnNotFoundWhenIdDoesNotExist() throws Exception {
+
+	    // Executa a requisição DELETE utilizando um ID inexistente.
+	    ResultActions result =
+	            mockMvc.perform(delete("/products/{id}", nonExistingId));
+
+	    // Verifica se a resposta HTTP possui o status 404 (Not Found).
+	    result.andExpect(status().isNotFound());
+	}
+	
+	@Test
+	public void deleteShouldReturnBadRequestWhenDependentId() throws Exception {
+
+	    // Executa a requisição DELETE para um produto que possui dependências.
+	    ResultActions result =
+	            mockMvc.perform(delete("/products/{id}", dependentId));
+
+	    // Verifica se a resposta HTTP possui o status 400 (Bad Request).
+	    result.andExpect(status().isBadRequest());
 	}
 
 }
