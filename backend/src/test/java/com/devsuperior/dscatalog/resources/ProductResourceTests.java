@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -198,6 +199,9 @@ public class ProductResourceTests {
 
 	    // Verifica se a resposta HTTP possui o status 204 (No Content).
 	    result.andExpect(status().isNoContent());
+	    
+	    // Verifica se o serviço foi chamado para excluir o produto com o ID informado.
+	    verify(service).delete(existingId);
 	}
 	
 	@Test
