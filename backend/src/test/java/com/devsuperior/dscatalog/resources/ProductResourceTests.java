@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -95,6 +96,31 @@ public class ProductResourceTests {
 		// ao tentar excluir um produto que possui dependências no banco de dados.
 		doThrow(DatabaseException.class).when(service).delete(dependentId);
 		
+		 // Configura o serviço simulado para retornar o DTO após a inserção.
+	    when(service.insert(any())).thenReturn(productDTO);
+		
+	}
+	
+	@Test
+	public void insertShouldReturnCreated() throws Exception {
+
+	    // Converte o DTO do produto para uma string no formato JSON.
+	    String jsonBody = objectMapper.writeValueAsString(productDTO);
+
+	    // Executa a requisição POST para cadastrar um novo produto.
+	    ResultActions result =
+	            mockMvc.perform(post("/products")
+	                    .content(jsonBody)
+	                    .contentType(MediaType.APPLICATION_JSON)
+	                    .accept(MediaType.APPLICATION_JSON));
+
+	    // Verifica se a resposta HTTP possui o status 201 (Created).
+	    result.andExpect(status().isCreated());
+
+	    // Verifica se a resposta contém o ID, nome e descrição do produto.
+	    result.andExpect(jsonPath("$.id").exists());
+	    result.andExpect(jsonPath("$.name").exists());
+	    result.andExpect(jsonPath("$.description").exists());
 	}
 	
 	@Test
