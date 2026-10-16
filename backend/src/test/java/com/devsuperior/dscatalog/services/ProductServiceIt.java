@@ -16,6 +16,8 @@ import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 
 //Carrega o contexto completo da aplicação para executar testes de integração.
 @SpringBootTest
+//Executa cada teste dentro de uma transação, revertendo as alterações
+//ao final da execução para evitar interferência entre os testes.
 @Transactional
 public class ProductServiceIt {
 	
