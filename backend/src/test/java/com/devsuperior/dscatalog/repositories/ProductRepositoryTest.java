@@ -53,11 +53,14 @@ public class ProductRepositoryTest {
 	@Test
 	public void saveShouldPersistWithAutoincrementWhenIdIsNull() {
 		
+		// Cria um produto sem ID para testar a geração automática.
 		Product product = Factory.createProduct();
 		product.setId(null);
 		
+		// Salva o produto no banco de dados de teste.
 		product = repository.save(product);
 		
+		// Verifica se o ID foi gerado e corresponde ao valor esperado.
 		Assertions.assertNotNull(product.getId());
 		Assertions.assertEquals(countTotalProducts + 1, product.getId());
 		
@@ -66,9 +69,13 @@ public class ProductRepositoryTest {
 	@Test
 	public void deleteShouldDeleteObjectWhenIdExists () {
 		
+		// Exclui o produto utilizando um ID existente.
 		repository.deleteById(exixtingId);
 		
+		// Busca o produto excluído para verificar se não existe mais.
 		Optional<Product> result = repository.findById(exixtingId);
+		
+		// Verifica se o produto não foi encontrado.
 		Assertions.assertFalse(result.isPresent());
 		
 	}
