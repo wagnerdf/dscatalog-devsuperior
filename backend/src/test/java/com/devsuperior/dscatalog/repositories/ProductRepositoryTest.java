@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
 import com.devsuperior.dscatalog.entities.Product;
@@ -20,12 +19,35 @@ public class ProductRepositoryTest {
 	private ProductRepository repository;
 	
 	private long exixtingId;
+	private long nonExistingId;
 	private long countTotalProducts;
 	
 	@BeforeEach
 	void setUp() throws Exception{
 		exixtingId = 1L;
+		nonExistingId = 1000L;
 		countTotalProducts = 25L;
+	}
+	
+	@Test
+	public void findByIdShouldReturnNonEmptyOptionalWhenIdExists() {
+
+	    // Busca um produto pelo ID existente no banco de dados de teste.
+	    Optional<Product> result = repository.findById(exixtingId);
+
+	    // Verifica se o Optional retornado contém um produto.
+	    Assertions.assertTrue(result.isPresent());
+	}
+
+	@Test
+	public void findByIdShouldReturnEmptyOptionalWhenIdDoesNotExist() {
+
+	    // Busca um produto utilizando um ID que não existe no banco de dados.
+	    Optional<Product> result = repository.findById(nonExistingId);
+
+	    // Verifica se o Optional retornado está vazio.
+	    Assertions.assertFalse(result.isPresent());
+	    Assertions.assertTrue(result.isEmpty());
 	}
 	
 	@Test
