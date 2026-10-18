@@ -1,6 +1,7 @@
 package com.devsuperior.dscatalog.resources;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,6 +15,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.devsuperior.dscatalog.dto.ProductDTO;
+import com.devsuperior.dscatalog.tests.Factory;
+
+import tools.jackson.databind.ObjectMapper;
+
 //Carrega o contexto completo da aplicação para realizar o teste de integração.
 @SpringBootTest
 //Configura o MockMvc para testar os endpoints HTTP sem iniciar um servidor real.
@@ -25,6 +31,9 @@ public class ProductResourceIT {
 	// Injeta o MockMvc para executar requisições HTTP durante os testes.
 	@Autowired
 	private MockMvc mockMvc;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 	
 	// ID de um produto existente no banco de dados de teste.
 	private long existingId;
@@ -67,6 +76,56 @@ public class ProductResourceIT {
 		result.andExpect(jsonPath("$.content[1].name").value("PC Gamer"));
 		// Verifica se o terceiro produto está ordenado pelo nome esperado.
 		result.andExpect(jsonPath("$.content[2].name").value("PC Gamer Alfa"));
+	}
+	
+	@Test
+	public void updateShouldReturnProductDTOWhenIdExists()  throws Exception {
+		
+		ProductDTO productDTO = Factory.createProductDTO();
+		
+		// Converte o DTO do produto para uma string no formato JSON.
+		String jsonBody = objectMapper.writeValueAsString(productDTO);
+		
+		// Armazena os valores esperados para validar a resposta da requisição.
+		String expectedName = productDTO.getName();
+		String expectedDescription = productDTO.getDescription();
+
+		// Executa uma requisição PUT para atualizar o produto com o ID existente,
+	    // enviando os dados do produto no corpo da requisição em formato JSON.
+		ResultActions result =  
+				mockMvc.perform(put("/products/{id}", existingId)
+		  				.content(jsonBody)
+		  				.contentType(MediaType.APPLICATION_JSON)
+		   				.accept(MediaType.APPLICATION_JSON));
+		
+		// Verifica se a resposta HTTP possui o status 200 (OK).
+		result.andExpect(status().isOk());
+		
+		// Verifica se o produto retornado possui o ID, name e description esperado.
+		result.andExpect(jsonPath("$.id").value(existingId));
+		result.andExpect(jsonPath("$.name").value(expectedName));
+		result.andExpect(jsonPath("$.description").value(expectedDescription));
+	}
+	
+	@Test
+	public void updateShouldReturnNotFoundWhenIdDoesNotExist()  throws Exception {
+		
+		// Cria um DTO de produto para utilizar na requisição de atualização.
+		ProductDTO productDTO = Factory.createProductDTO();
+		
+		// Converte o DTO do produto para uma string no formato JSON.
+		String jsonBody = objectMapper.writeValueAsString(productDTO);
+
+		// Executa uma requisição PUT utilizando um ID que não existe no banco,
+	    // enviando os dados do produto no corpo da requisição em formato JSON.
+		ResultActions result =  
+				mockMvc.perform(put("/products/{id}", nonExistingId)
+		  				.content(jsonBody)
+		  				.contentType(MediaType.APPLICATION_JSON)
+		   				.accept(MediaType.APPLICATION_JSON));
+		
+		// Verifica se a resposta HTTP possui o status 404 (Not Found).
+		result.andExpect(status().isNotFound());
 	}
 
 }
