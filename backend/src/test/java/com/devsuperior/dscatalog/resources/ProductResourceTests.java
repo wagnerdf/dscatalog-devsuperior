@@ -219,9 +219,11 @@ public class ProductResourceTests {
 	@Test
 	public void deleteShouldReturnNoContentWhenIdExists() throws Exception {
 
-	    // Executa a requisição DELETE para excluir o produto com ID existente.
+		// Executa a requisição DELETE para excluir o produto com ID existente,
+	    // solicitando que a resposta seja retornada no formato JSON.
 	    ResultActions result =
-	            mockMvc.perform(delete("/products/{id}", existingId));
+	            mockMvc.perform(delete("/products/{id}", existingId)
+	                    .accept(MediaType.APPLICATION_JSON));
 
 	    // Verifica se a resposta HTTP possui o status 204 (No Content).
 	    result.andExpect(status().isNoContent());
@@ -235,7 +237,8 @@ public class ProductResourceTests {
 
 	    // Executa a requisição DELETE utilizando um ID inexistente.
 	    ResultActions result =
-	            mockMvc.perform(delete("/products/{id}", nonExistingId));
+	            mockMvc.perform(delete("/products/{id}", nonExistingId)
+	            		.accept(MediaType.APPLICATION_JSON));
 
 	    // Verifica se a resposta HTTP possui o status 404 (Not Found).
 	    result.andExpect(status().isNotFound());
@@ -244,9 +247,11 @@ public class ProductResourceTests {
 	@Test
 	public void deleteShouldReturnBadRequestWhenDependentId() throws Exception {
 
-	    // Executa a requisição DELETE para um produto que possui dependências.
+		// Executa a requisição DELETE para um produto que possui dependências,
+	    // solicitando que a resposta seja retornada no formato JSON.
 	    ResultActions result =
-	            mockMvc.perform(delete("/products/{id}", dependentId));
+	            mockMvc.perform(delete("/products/{id}", dependentId)
+	                    .accept(MediaType.APPLICATION_JSON));
 
 	    // Verifica se a resposta HTTP possui o status 400 (Bad Request).
 	    result.andExpect(status().isBadRequest());
