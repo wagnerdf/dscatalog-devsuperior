@@ -13,6 +13,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+/**
+ * Utilitário de testes responsável por obter tokens de acesso OAuth2.
+ *
+ * • Centraliza a autenticação utilizada pelos testes de integração.
+ * • Utiliza o MockMvc para simular uma requisição HTTP ao endpoint de tokens.
+ * • Retorna o access token que será utilizado nas requisições autenticadas.
+ */
 @Component
 public class TokenUtil {
 
@@ -22,6 +29,23 @@ public class TokenUtil {
 	@Value("${security.client-secret}")
 	private String clientSecret;
 	
+	/**
+	 * Solicita um token de acesso OAuth2 utilizando as credenciais do cliente
+	 * e as credenciais do usuário informado.
+	 *
+	 * • Prepara os parâmetros do fluxo de concessão por senha (password).
+	 * • Autentica o cliente utilizando HTTP Basic.
+	 * • Envia uma requisição POST para /oauth2/token.
+	 * • Verifica se a resposta possui status HTTP 200 e conteúdo JSON.
+	 * • Extrai e retorna o valor da propriedade access_token.
+	 *
+	 * @param mockMvc componente utilizado para simular a requisição HTTP
+	 * @param username nome de usuário utilizado na autenticação
+	 * @param password senha do usuário utilizado na autenticação
+	 * @return token de acesso OAuth2 extraído da resposta
+	 * @throws Exception caso a requisição, as verificações ou a leitura
+	 *                   da resposta apresentem algum erro
+	 */
 	public String obtainAccessToken(MockMvc mockMvc, String username, String password) throws Exception {
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
