@@ -34,10 +34,15 @@ public class ProductService {
 	private CategoryRepository categoryRepository;
 	
 	@Transactional(readOnly = true)
-	public Page<ProductDTO> findAllPaged(String name, String categoryId, Pageable pageable) {
-		Page<Product> list = repository.findAll(pageable);
-		return list.map(x -> new ProductDTO(x));
-	}
+	public Page<ProductProjection> findAllPaged(String name, String categoryId, Pageable pageable) {
+		
+		List<Long> categoryIds = Arrays.asList();
+		if(!"0".equals(categoryId)) {
+			categoryIds = Arrays.asList(categoryId.split(",")).stream().map(Long::parseLong).toList();
+		}
+		
+		return repository.searchProducts(categoryIds, name, pageable);
+	}	
 
 	@Transactional(readOnly = true)
 	public ProductDTO findById(Long id) {
@@ -94,15 +99,4 @@ public class ProductService {
 			entity.getCategories().add(category);			
 		}
 	}
-
-	@Transactional(readOnly = true)
-	public Page<ProductProjection> findAllPaged2(String name, String categoryId, Pageable pageable) {
-		
-		List<Long> categoryIds = Arrays.asList();
-		if(!"0".equals(categoryId)) {
-			categoryIds = Arrays.asList(categoryId.split(",")).stream().map(Long::parseLong).toList();
-		}
-		
-		return repository.searchProducts(categoryIds, name, pageable);
-	}	
 }
