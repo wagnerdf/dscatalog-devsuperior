@@ -1,4 +1,4 @@
-package com.devsuperior.dscatalog.resources.exceptions;
+package com.devsuperior.dscatalog.services.exceptions;
 
 @SuppressWarnings("serial")
 public class EmailException extends RuntimeException {

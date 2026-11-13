@@ -7,7 +7,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import com.devsuperior.dscatalog.resources.exceptions.EmailException;
+import com.devsuperior.dscatalog.services.exceptions.EmailException;
 
 @Service
 public class EmailService {
