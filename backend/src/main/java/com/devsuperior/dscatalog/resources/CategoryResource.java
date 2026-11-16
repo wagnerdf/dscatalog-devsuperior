@@ -19,25 +19,50 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.services.CategoryService;
 
+/**
+ * Resource responsável pelos endpoints de gerenciamento de categorias.
+ * Disponibiliza operações de consulta, inserção, atualização e exclusão.
+ */
 @RestController
 @RequestMapping(value = "/categories")
 public class CategoryResource {
 
+	/**
+     * Serviço responsável pelas operações relacionadas às categorias.
+     */
 	@Autowired
 	private CategoryService service;
 	
+	/**
+     * Retorna todas as categorias cadastradas.
+     *
+     * @return resposta HTTP 200 contendo a lista de categorias
+     */
 	@GetMapping
 	public ResponseEntity<List<CategoryDTO>> findAll() {
 		List<CategoryDTO> list = service.findAll();		
 		return ResponseEntity.ok().body(list);
 	}
 
+	/**
+     * Busca uma categoria pelo seu identificador.
+     *
+     * @param id identificador da categoria
+     * @return resposta HTTP 200 contendo a categoria encontrada
+     */
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<CategoryDTO> findById(@PathVariable Long id) {
 		CategoryDTO dto = service.findById(id);
 		return ResponseEntity.ok().body(dto);
 	}
 	
+	 /**
+     * Insere uma nova categoria.
+     * Operação permitida aos usuários com perfil ADMIN ou OPERATOR.
+     *
+     * @param dto objeto contendo os dados da categoria
+     * @return resposta HTTP 201 contendo a categoria criada e sua URI
+     */
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
 	@PostMapping
 	public ResponseEntity<CategoryDTO> insert(@RequestBody CategoryDTO dto) {
@@ -47,6 +72,14 @@ public class CategoryResource {
 		return ResponseEntity.created(uri).body(dto);
 	}
 
+	/**
+     * Atualiza os dados de uma categoria existente.
+     * Operação permitida aos usuários com perfil ADMIN ou OPERATOR.
+     *
+     * @param id  identificador da categoria que será atualizada
+     * @param dto objeto contendo os novos dados da categoria
+     * @return resposta HTTP 200 contendo a categoria atualizada
+     */
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<CategoryDTO> update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
@@ -54,6 +87,13 @@ public class CategoryResource {
 		return ResponseEntity.ok().body(dto);
 	}
 
+	/**
+     * Exclui uma categoria pelo seu identificador.
+     * Operação permitida aos usuários com perfil ADMIN ou OPERATOR.
+     *
+     * @param id identificador da categoria que será excluída
+     * @return resposta HTTP 204 (No Content) em caso de sucesso
+     */
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
