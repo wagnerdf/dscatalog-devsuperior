@@ -29,6 +29,12 @@ import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Serviço responsável pelo gerenciamento de usuários e pela autenticação
+ * da aplicação, implementando a interface UserDetailsService do Spring Security.
+ * Disponibiliza operações de consulta, cadastro, atualização e exclusão
+ * de usuários, além de carregar os dados necessários para autenticação.
+ */
 @Service
 public class UserService implements UserDetailsService {
 	
@@ -44,18 +50,36 @@ public class UserService implements UserDetailsService {
 	@Autowired
 	private AuthService authService;
 	
+	/**
+	 * Busca todos os usuários de forma paginada.
+	 *
+	 * @param pageable parâmetros de paginação e ordenação dos resultados
+	 * @return página contendo os usuários convertidos para UserDTO
+	 */
 	@Transactional(readOnly = true)
 	public Page<UserDTO> findAllPaged(Pageable pageable) {
 		Page<User> list = repository.findAll(pageable);
 		return list.map(x -> new UserDTO(x));
 	}
 	
+	/**
+	 * Recupera os dados do usuário atualmente autenticado.
+	 *
+	 * @return dados do usuário autenticado convertidos para UserDTO
+	 */
 	@Transactional(readOnly = true)
 	public UserDTO findMe() {
 		User entity = authService.authenticated();
 		return new UserDTO(entity);
 	}
 
+	/**
+	 * Busca um usuário pelo seu identificador.
+	 *
+	 * @param id identificador do usuário
+	 * @return dados do usuário encontrado
+	 * @throws ResourceNotFoundException caso não exista usuário com o identificador informado
+	 */
 	@Transactional(readOnly = true)
 	public UserDTO findById(Long id) {		
 		Optional<User> obj = repository.findById(id);
@@ -63,6 +87,13 @@ public class UserService implements UserDetailsService {
 		return new UserDTO(entity);
 	}
 
+	/**
+	 * Cadastra um novo usuário, atribuindo inicialmente a permissão ROLE_OPERATOR.
+	 * A senha recebida é codificada antes de ser armazenada no banco de dados.
+	 *
+	 * @param dto dados necessários para cadastrar o usuário
+	 * @return dados do usuário criado
+	 */
 	@Transactional
 	public UserDTO insert(UserInsertDTO dto) {
 		User entity = new User();
@@ -77,6 +108,14 @@ public class UserService implements UserDetailsService {
 		return new UserDTO(entity);
 	}
 
+	/**
+	 * Atualiza os dados de um usuário existente.
+	 *
+	 * @param id identificador do usuário a ser atualizado
+	 * @param dto novos dados do usuário
+	 * @return dados do usuário atualizado
+	 * @throws ResourceNotFoundException caso não exista usuário com o identificador informado
+	 */
 	@Transactional
 	public UserDTO update(Long id, UserUpdateDTO dto) {
 		try {
@@ -90,6 +129,15 @@ public class UserService implements UserDetailsService {
 		}		
 	}
 
+	/**
+	 * Exclui um usuário pelo seu identificador.
+	 * Verifica previamente sua existência e trata possíveis violações
+	 * de integridade referencial no banco de dados.
+	 *
+	 * @param id identificador do usuário a ser excluído
+	 * @throws ResourceNotFoundException caso o usuário não seja encontrado
+	 * @throws DatabaseException caso a exclusão viole alguma restrição de integridade do banco de dados
+	 */
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public void delete(Long id) {
 		if (!repository.existsById(id)) {
@@ -103,6 +151,13 @@ public class UserService implements UserDetailsService {
 		}
 	}
 	
+	/**
+	 * Copia os dados do DTO para a entidade User e atualiza
+	 * as associações com as permissões informadas.
+	 *
+	 * @param dto objeto contendo os dados do usuário e suas permissões
+	 * @param entity entidade de usuário que receberá os dados
+	 */
 	private void copyDtoToEntity(UserDTO dto, User entity) {
 
 		entity.setFirstName(dto.getFirstName());
@@ -116,6 +171,14 @@ public class UserService implements UserDetailsService {
 		}
 	}
 
+	/**
+	 * Carrega os dados de um usuário pelo endereço de e-mail,
+	 * incluindo suas permissões, para utilização no processo de autenticação.
+	 *
+	 * @param username endereço de e-mail utilizado como identificador do usuário
+	 * @return dados do usuário e suas permissões para autenticação
+	 * @throws UsernameNotFoundException caso não exista usuário associado ao e-mail informado
+	 */
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		
