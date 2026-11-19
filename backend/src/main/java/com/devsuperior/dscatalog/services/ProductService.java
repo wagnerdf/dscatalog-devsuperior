@@ -26,6 +26,11 @@ import com.devsuperior.dscatalog.util.Utils;
 
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Serviço responsável pelas operações de gerenciamento de produtos.
+ * Implementa funcionalidades de consulta, inserção, atualização e exclusão,
+ * além de realizar a associação entre produtos e categorias.
+ */
 @Service
 public class ProductService {
 
@@ -35,6 +40,16 @@ public class ProductService {
 	@Autowired
 	private CategoryRepository categoryRepository;
 	
+	/**
+	 * Busca produtos de forma paginada, permitindo filtrar pelo nome
+	 * e pelos identificadores das categorias.
+	 * Mantém a ordenação e os dados de paginação da consulta original.
+	 *
+	 * @param name nome ou parte do nome utilizado como filtro
+	 * @param categoryId identificador ou lista de identificadores das categorias
+	 * @param pageable parâmetros de paginação e ordenação
+	 * @return página contendo os produtos encontrados convertidos para ProductDTO
+	 */
 	@SuppressWarnings("unchecked")
 	@Transactional(readOnly = true)
 	public Page<ProductDTO> findAllPaged(String name, String categoryId, Pageable pageable) {
@@ -56,6 +71,13 @@ public class ProductService {
 	    return new PageImpl<>(dtos, page.getPageable(), page.getTotalElements());
 	}
 
+	/**
+	 * Busca um produto pelo seu identificador, incluindo suas categorias associadas.
+	 *
+	 * @param id identificador do produto
+	 * @return dados do produto encontrado, incluindo suas categorias
+	 * @throws ResourceNotFoundException caso não exista produto com o identificador informado
+	 */
 	@Transactional(readOnly = true)
 	public ProductDTO findById(Long id) {
 		Optional<Product> obj = repository.findById(id);
@@ -63,6 +85,13 @@ public class ProductService {
 		return new ProductDTO(entity, entity.getCategories());
 	}
 
+	/**
+	 * Insere um novo produto no banco de dados.
+	 * Copia os dados recebidos e associa as categorias informadas.
+	 *
+	 * @param dto dados do produto a ser cadastrado
+	 * @return dados do produto criado
+	 */
 	@Transactional
 	public ProductDTO insert(ProductDTO dto) {
 		Product entity = new Product();
@@ -71,6 +100,14 @@ public class ProductService {
 		return new ProductDTO(entity);
 	}
 
+	/**
+	 * Atualiza os dados de um produto existente, incluindo suas categorias.
+	 *
+	 * @param id identificador do produto a ser atualizado
+	 * @param dto novos dados do produto
+	 * @return dados do produto atualizado
+	 * @throws ResourceNotFoundException caso não exista produto com o identificador informado
+	 */
 	@Transactional
 	public ProductDTO update(Long id, ProductDTO dto) {
 		try {
@@ -84,6 +121,16 @@ public class ProductService {
 		}		
 	}
 
+
+	/**
+	 * Exclui um produto pelo seu identificador.
+	 * Verifica previamente sua existência e trata possíveis violações
+	 * de integridade referencial no banco de dados.
+	 *
+	 * @param id identificador do produto a ser excluído
+	 * @throws ResourceNotFoundException caso o produto não seja encontrado
+	 * @throws DatabaseException caso a exclusão viole alguma restrição de integridade do banco de dados
+	 */
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public void delete(Long id) {
 		if (!repository.existsById(id)) {
@@ -97,6 +144,13 @@ public class ProductService {
 		}
 	}
 	
+	/**
+	 * Copia os dados do DTO para a entidade Product e atualiza
+	 * as associações com as categorias informadas.
+	 *
+	 * @param dto objeto contendo os dados do produto e suas categorias
+	 * @param entity entidade de produto que receberá os dados
+	 */
 	private void copyDtoToEntity(ProductDTO dto, Product entity) {
 
 		entity.setName(dto.getName());
