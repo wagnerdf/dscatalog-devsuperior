@@ -16,6 +16,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+/**
+ * Validador personalizado para a atualização de usuários.
+ * 
+ * Verifica se o e-mail informado já pertence a outro usuário cadastrado.
+ * Utiliza o identificador do usuário presente na URL para permitir que
+ * o próprio usuário mantenha seu e-mail durante a atualização.
+ */
 public class UserUpdateValidator implements ConstraintValidator<UserUpdateValid, UserUpdateDTO> {
 	
 	@Autowired
@@ -24,10 +31,26 @@ public class UserUpdateValidator implements ConstraintValidator<UserUpdateValid,
 	@Autowired
 	private UserRepository repository;
 	
+	/**
+	 * Inicializa o validador personalizado.
+	 *
+	 * @param ann anotação de validação associada ao validador
+	 */
 	@Override
 	public void initialize(UserUpdateValid ann) {
 	}
 
+	/**
+	 * Verifica se os dados informados para atualização do usuário são válidos.
+	 * 
+	 * Obtém o identificador do usuário a partir das variáveis da URL e consulta
+	 * o repositório para verificar se o e-mail informado já está cadastrado
+	 * para outro usuário.
+	 *
+	 * @param dto objeto contendo os dados do usuário a serem validados
+	 * @param context contexto utilizado para registrar as violações de validação
+	 * @return {@code true} se não houver erros de validação; {@code false} caso contrário
+	 */
 	@Override
 	public boolean isValid(UserUpdateDTO dto, ConstraintValidatorContext context) {
 		
